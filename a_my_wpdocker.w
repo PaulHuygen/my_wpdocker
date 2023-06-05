@@ -62,6 +62,7 @@ terminal. When you stop it, all modifications are lost.
 @o Dockerfile @{@%
 FROM m4_docker_template
 EXPOSE m4_expose_port
+@< ``run'' commands in Dockerfile @>
 CMD ["/bin/bash"]
 @| @}
 
@@ -75,6 +76,17 @@ CMD ["/bin/bash"]
 docker build -t ubuntu-docker .
 @| @}
 
+\section{Connect to the back-up of the original source}
+\label{sec:restore}
+
+We used \href{https://github.com/gkiefer/backup2l}{backup2l} to
+back-up the server, so we need this program in our image te restore
+things:
+
+@d ``run'' commands in Dockerfile @{@%
+RUN apt-get update
+RUN apt-get install backup2l
+@| backup2l @}
 
 
 \section{Indexes}
