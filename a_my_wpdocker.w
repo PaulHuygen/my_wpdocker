@@ -62,19 +62,49 @@ terminal. When you stop it, all modifications are lost.
 @o Dockerfile @{@%
 FROM m4_docker_template
 EXPOSE m4_expose_port
+@< copy stuff to the image @>
 @< ``run'' commands in Dockerfile @>
 CMD ["/bin/bash"]
 @| @}
 
 @o doit @{@%
-  make sources
-  @< build the Docker image @>
+#!/bin/bash
+# doit -- generate the image
+@< init doit @>
+make sources
+@< build the Docker image @>
+@< make scripts executable @>
+
+# @< finit doit @>
 @| @}
 
 
 @d build the Docker image @{@%
-docker build -t ubuntu-docker .
+docker build -t m4_docker_image .
 @| @}
+
+To restore the Wordpress-site on the image, \texttt{RUN} a script with
+instructions.
+
+@o restore @{@%
+#!/bin/bash
+@< restore instructions @>
+@| @}
+
+@d make scripts executable @{@%
+chmod 775 restore
+@| @}
+
+
+@d copy stuff to the image @{@%
+COPY --chmod=755 restore /root/restore
+@| @}
+
+@d ``run'' commands in Dockerfile  @{@%
+RUN /root/restore
+@| @}
+
+
 
 \section{Connect to the back-up of the original source}
 \label{sec:restore}
@@ -83,10 +113,42 @@ We used \href{https://github.com/gkiefer/backup2l}{backup2l} to
 back-up the server, so we need this program in our image te restore
 things:
 
-@d ``run'' commands in Dockerfile @{@%
-RUN apt-get update
-RUN apt-get install backup2l
+@d restore instructions @{@%
+apt-get update
+apt-get install backup2l
 @| backup2l @}
+
+Mount the directory of the back-up on directory \texttt{/backup}. We
+assume that the back-up files that backup2l has made are available on
+directory \texttt{m4_host_b2l_repo} on the Docker host. The
+\texttt{docker run} instruction contains a mount option that connects
+this directory to the local \verb|/backup| directory.
+
+@d init doit @{@%
+source  m4_local_initscript
+@| @}
+
+
+\section{Run the Docker image}
+\label{sec:run-the-image}
+
+@o run_the_image @{@%
+#!/bin/bash
+# run_the_image -- start a container with the cltl image
+docker run   -it --mount type=bind,src=<!!>m4_host_b2l_repo<!!>,target=<!!>m4_local_b2l_repo<!!>  m4_docker_image
+@| @}
+
+@d make macros executable @{@%
+chmod 775 run_the_image
+@| @}
+
+
+Make sure that the mount-point in the docker image exists.
+
+@d restore instructions @{@%
+mkdir -p m4_local_b2l_repo
+@| @}
+
 
 
 \section{Indexes}
