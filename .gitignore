@@ -1,4 +1,13 @@
 ## Added by me, PH
+transferdir
+transferdir/*
+doit
+Dockerfile
+cltl_bak.conf
+*.tmp
+restore
+temp/*
+temp
 *~
 ## From the template .gitgnore
 ## Core latex/pdflatex auxiliary files:
